@@ -17,7 +17,7 @@ MonoBehaviour:
   AadAuthorization: 
   SelectedStudio: ocebi
   SdkPath: Assets/_3rdParty/PlayFabSDK
-  EdExPath: 
+  EdExPath: Assets/_3rdParty/PlayFabEditorExtensions
   LocalCloudScriptPath: 
   PanelIsShown: 0
   curMainMenuIdx: 2
