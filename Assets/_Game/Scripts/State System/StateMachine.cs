@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace StateSystem
@@ -27,6 +28,8 @@ namespace StateSystem
             while (statesEnumerator.MoveNext())
             {
                 statesEnumerator.Current.Value.Initialize(this, gameObject);
+                if (ActivateCurrentStateGameObject)
+                    statesEnumerator.Current.Value.gameObject.SetActive(false);
             }
             statesEnumerator.Dispose();
             
@@ -49,19 +52,20 @@ namespace StateSystem
             CurrentState.OnStateUpdate();
         }
         
-        // private void SetStates()
-        // {
-        //     m_AvailableStates.Clear();
-        //     for (int i = 0; i < transform.childCount; i++)
-        //     {
-        //         var type = transform.GetChild(i).GetComponent<State>().GetType().ToString();
-        //         var state = transform.GetChild(i).GetComponent<State>();
-        //         if (!m_AvailableStates.ContainsKey(type))
-        //             m_AvailableStates.Add(type, state);
-        //         if (ActivateCurrentStateGameObject)
-        //             state.gameObject.SetActive(false);
-        //     }
-        // }
+        [Button]
+        private void SetStates()
+        {
+            m_AvailableStates.Clear();
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                var type = transform.GetChild(i).GetComponent<State>().GetType().ToString();
+                var state = transform.GetChild(i).GetComponent<State>();
+                if (!m_AvailableStates.ContainsKey(type))
+                    m_AvailableStates.Add(type, state);
+                if (ActivateCurrentStateGameObject)
+                    state.gameObject.SetActive(false);
+            }
+        }
 
         public void ActivateStateMachine()
         {
