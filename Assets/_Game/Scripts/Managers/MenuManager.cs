@@ -4,18 +4,23 @@ using UnityEngine;
 
 public class MenuManager : Singleton<MenuManager>
 {
-    [SerializeField, ReadOnly]
-    private StateMachine m_MenuStateMachine;
+    [ReadOnly]
+    public StateMachine MenuStateMachine;
 
     [Button]
     private void SetRefs()
     {
-        m_MenuStateMachine = GetComponentInChildren<StateMachine>();
+        MenuStateMachine = GetComponentInChildren<StateMachine>();
     }
 
     [Button]
     public void OpenScreen(string screenName)
     {
-        m_MenuStateMachine.SetNewState(screenName);
+        MenuStateMachine.SetNewState(screenName);
+    }
+
+    public bool IsScreenOpened(string screenName)
+    {
+        return MenuStateMachine.CurrentStateName == screenName;
     }
 }
