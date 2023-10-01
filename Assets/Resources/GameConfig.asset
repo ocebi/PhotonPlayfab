@@ -13,8 +13,20 @@ MonoBehaviour:
   m_Name: GameConfig
   m_EditorClassIdentifier: 
   UserData:
-    Username: Player_100711
+    Username: test2
     PlayerStatisticDictionary:
-      keyData: 000000000200000001000000
-      valueData: 000000000000000000000000
+      keyData: 020000000100000000000000
+      valueData: 02000000060000004c000000
+  MaxPlayers: 1
+  InitialCountdown: 5
+  MatchDuration: 10
   PlayerStatisticsList: 000000000100000002000000
+  InfoMessageDictionary:
+    keyData: 000000000100000002000000030000000400000005000000
+    valueData:
+    - Connecting to server
+    - Logging in
+    - Logging out
+    - Connected
+    - Password is too short
+    - Name set successfully
