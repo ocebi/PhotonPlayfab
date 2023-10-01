@@ -47,7 +47,8 @@ public class Screen_Finish : State
     private void OnBackButtonClicked()
     {
         PhotonNetwork.Disconnect();
-        MenuManager.Instance.OpenScreen(nameof(Screen_Menu));
+        if (!MenuManager.Instance.IsScreenOpened(nameof(Screen_Menu)))
+            MenuManager.Instance.OpenScreen(nameof(Screen_Menu));
     }
 
     private void SetPlayerStatisticsText()
@@ -56,17 +57,25 @@ public class Screen_Finish : State
         m_OpponentStatsText.SetText("");
         m_PlayerScoreText.SetText("");
         m_OpponentScoreText.SetText("");
-        int highScore = 0, winCount = 0, loseCount = 0;
+        // int highScore = 0, winCount = 0, loseCount = 0;
         foreach (var currentRoomPlayer in PhotonNetwork.CurrentRoom.Players)
         {
-            if (currentRoomPlayer.Value.CustomProperties.TryGetValue(PlayerStatistics.HighScore.ToString(), out var highScoreObject))
-                highScore = (byte)highScoreObject;
-            if (currentRoomPlayer.Value.CustomProperties.TryGetValue(PlayerStatistics.WinCount.ToString(), out var winCountObject))
-                winCount = (byte)winCountObject;
-            if (currentRoomPlayer.Value.CustomProperties.TryGetValue(PlayerStatistics.LoseCount.ToString(), out var loseCountObject))
-                loseCount = (byte)loseCountObject;
+            int playerStat = 0;
             string statsText = currentRoomPlayer.Value.NickName + "\n";
-            statsText += $"Highscore: {highScore}\nWin count: {winCount}\nLose count: {loseCount}";
+            foreach (var playerStatistics in GameConfig.Instance.PlayerStatisticsList)
+            {
+                if (currentRoomPlayer.Value.CustomProperties.TryGetValue(playerStatistics.ToString(), out var playerStatRaw))
+                    playerStat = (byte)playerStatRaw;
+                statsText += $"{playerStatistics.ToString()}: {playerStat}\n";
+                playerStat = 0;
+            }
+            // if (currentRoomPlayer.Value.CustomProperties.TryGetValue(PlayerStatistics.HighScore.ToString(), out var highScoreObject))
+            //     highScore = (byte)highScoreObject;
+            // if (currentRoomPlayer.Value.CustomProperties.TryGetValue(PlayerStatistics.WinCount.ToString(), out var winCountObject))
+            //     winCount = (byte)winCountObject;
+            // if (currentRoomPlayer.Value.CustomProperties.TryGetValue(PlayerStatistics.LoseCount.ToString(), out var loseCountObject))
+            //     loseCount = (byte)loseCountObject;
+            // statsText += $"Highscore: {highScore}\nWin count: {winCount}\nLose count: {loseCount}";
             if (currentRoomPlayer.Value.IsLocal)
             {
                 m_PlayerStatsText.SetText(statsText);

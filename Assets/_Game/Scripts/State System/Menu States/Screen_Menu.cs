@@ -60,6 +60,7 @@ public class Screen_Menu : State, IConnectionCallbacks
         PlayfabManager.OnLoginStatusChanged += OnLoginStatusChanged;
         PlayfabManager.OnErrorReceived += OnErrorReceived;
         PlayfabManager.OnMessageReceived += OnMessageReceived;
+        NetworkManager.OnErrorReceived += OnErrorReceived;
         m_ManualLoginButton.onClick.AddListener(OnManualLoginButtonClicked);
         m_GuestLoginButton.onClick.AddListener(OnGuestLoginButtonClicked);
         m_PlayButton.onClick.AddListener(OnPlayButtonClicked);
@@ -80,6 +81,7 @@ public class Screen_Menu : State, IConnectionCallbacks
         PlayfabManager.OnLoginStatusChanged -= OnLoginStatusChanged;
         PlayfabManager.OnErrorReceived -= OnErrorReceived;
         PlayfabManager.OnMessageReceived -= OnMessageReceived;
+        NetworkManager.OnErrorReceived -= OnErrorReceived;
         m_ManualLoginButton.onClick.RemoveAllListeners();
         m_GuestLoginButton.onClick.RemoveAllListeners();
         m_PlayButton.onClick.RemoveAllListeners();
@@ -140,6 +142,7 @@ public class Screen_Menu : State, IConnectionCallbacks
 
     private void OnPlayButtonClicked()
     {
+        PhotonNetwork.NickName = GameConfig.Instance.UserData.Username;
         SetInfoText(GameConfig.Instance.InfoMessageDictionary[InfoMessages.Login]);
         NetworkManager.Instance.JoinRandomRoom();
         MenuManager.Instance.OpenScreen(nameof(Screen_Matchmaking));

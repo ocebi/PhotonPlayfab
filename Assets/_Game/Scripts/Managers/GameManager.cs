@@ -42,6 +42,8 @@ public class GameManager : Singleton<GameManager>, IInRoomCallbacks
 
     public void FinishGame()
     {
+        if (!IsGameStarted)
+            return;
         SendScores();
         OnGameFinished.InvokeSafe();
         IsGameStarted = false;

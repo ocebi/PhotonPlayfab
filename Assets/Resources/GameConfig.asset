@@ -16,7 +16,7 @@ MonoBehaviour:
     Username: test2
     PlayerStatisticDictionary:
       keyData: 020000000100000000000000
-      valueData: 02000000090000004c000000
+      valueData: 030000000b0000004c000000
   MaxPlayers: 2
   InitialCountdown: 5
   MatchDuration: 30
@@ -29,4 +29,4 @@ MonoBehaviour:
     - Logging out
     - Connected
     - Password is too short
-    - Name set successfully
+    - Player name set

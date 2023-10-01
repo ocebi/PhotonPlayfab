@@ -1,14 +1,13 @@
+using System;
 using System.Collections.Generic;
-using System.IO;
 using Photon.Pun;
 using Photon.Realtime;
 using Sirenix.OdinInspector;
-using StateSystem;
-using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class NetworkManager : Singleton<NetworkManager>, IConnectionCallbacks, ILobbyCallbacks, IMatchmakingCallbacks, IInRoomCallbacks
 {
+    public static Action<string> OnErrorReceived;
     private void Start()
     {
         StartJoin();
@@ -112,8 +111,11 @@ public class NetworkManager : Singleton<NetworkManager>, IConnectionCallbacks, I
     {
         if (MenuManager.IsInstanceNull)
             return;
+        GameManager.Instance.FinishGame();
         if (MenuManager.Instance.IsScreenOpened(nameof(Screen_Menu)))
             MenuManager.Instance.OpenScreen(nameof(Screen_Menu));
+        if (cause != DisconnectCause.DisconnectByClientLogic) //Display error message
+            OnErrorReceived.InvokeSafe(cause.ToString());
     }
 
     public void OnRegionListReceived(RegionHandler regionHandler)
@@ -194,6 +196,9 @@ public class NetworkManager : Singleton<NetworkManager>, IConnectionCallbacks, I
 
     public void OnPlayerLeftRoom(Player otherPlayer)
     {
+        if (MenuManager.Instance.IsScreenOpened(nameof(Screen_Finish)))
+            return;
+        GameManager.Instance.FinishGame();
         PhotonNetwork.Disconnect();
         MenuManager.Instance.OpenScreen(nameof(Screen_Menu));
     }

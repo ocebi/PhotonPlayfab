@@ -38,8 +38,9 @@ public class PlayfabManager : Singleton<PlayfabManager>
     {
         if (loginData.Password.Length < 6)
         {
-            Debug.LogError("Password is too short");
-            OnErrorReceived.InvokeSafe("Password is too short");
+            if (IsSingletonLogsEnabled)
+                Debug.LogError("Password is too short");
+            OnErrorReceived.InvokeSafe(GameConfig.Instance.InfoMessageDictionary[InfoMessages.PasswordShort]);
             return;
         }
         m_LoginData = loginData;
@@ -72,7 +73,8 @@ public class PlayfabManager : Singleton<PlayfabManager>
     public void Logout()
     {
         PlayFabClientAPI.ForgetAllCredentials();
-        Debug.LogError("Logged out");
+        if (IsSingletonLogsEnabled)
+            Debug.LogError("Logged out");
         OnLoginStatusChanged.InvokeSafe();
     }
 
@@ -81,7 +83,8 @@ public class PlayfabManager : Singleton<PlayfabManager>
     {
         if (!PlayFabClientAPI.IsClientLoggedIn())
         {
-            Debug.LogError("Client is not logged in");
+            if (IsSingletonLogsEnabled)
+                Debug.LogError("Client is not logged in");
             return;
         }
         
@@ -102,7 +105,8 @@ public class PlayfabManager : Singleton<PlayfabManager>
             },
             error =>
             {
-                Debug.LogError(error.GenerateErrorReport());
+                if (IsSingletonLogsEnabled)
+                    Debug.LogError(error.GenerateErrorReport());
             });
     }
 
@@ -121,7 +125,7 @@ public class PlayfabManager : Singleton<PlayfabManager>
         PlayFabClientAPI.GetPlayerStatistics(
             new GetPlayerStatisticsRequest(),
             OnGetStatistics,
-            error => Debug.LogError(error.GenerateErrorReport())
+            error => { if (IsSingletonLogsEnabled) Debug.LogError(error.GenerateErrorReport()); } 
         );
     }
 
@@ -144,7 +148,7 @@ public class PlayfabManager : Singleton<PlayfabManager>
 
     private void OnLoginSuccess(LoginResult loginResult)
     {
-        GameConfig.Instance.UserData = new UserData(); //TODO: To be refactored
+        GameConfig.Instance.UserData = new UserData();
         string name = null;
         if (loginResult.InfoResultPayload.PlayerProfile != null)
             name = loginResult.InfoResultPayload.PlayerProfile.DisplayName;
@@ -158,14 +162,15 @@ public class PlayfabManager : Singleton<PlayfabManager>
     
     private void OnPlayFabError(PlayFabError playfabError)
     {
-        Debug.LogError($"Playfab error: {playfabError.Error.ToString()}");
+        if (IsSingletonLogsEnabled)
+            Debug.LogError($"Playfab error: {playfabError.Error.ToString()}");
         OnErrorReceived.InvokeSafe(playfabError.Error.ToString());
     }
     
     private void OnDisplayNameUpdateSuccess(UpdateUserTitleDisplayNameResult updateUserTitleDisplayNameResult)
     {
         GameConfig.Instance.UserData.Username = updateUserTitleDisplayNameResult.DisplayName;
-        OnMessageReceived.InvokeSafe("Name set successfully");
+        OnMessageReceived.InvokeSafe(GameConfig.Instance.InfoMessageDictionary[InfoMessages.NameSet]);
     }
 
     private void OnGetStatistics(GetPlayerStatisticsResult result)

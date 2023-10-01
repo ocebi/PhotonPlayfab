@@ -14,6 +14,7 @@ public class ButtonController : Singleton<ButtonController>
     private PunchScaleFeedback m_Feedback;
     [SerializeField, ReadOnly] 
     private TMP_Text m_ClickText;
+    private Camera cam;
 
     [Button]
     private void SetRefs()
@@ -32,6 +33,11 @@ public class ButtonController : Singleton<ButtonController>
         GameManager.OnGameFinished += OnGameFinished;
     }
 
+    protected override void OnAwakeEvent()
+    {
+        cam = Camera.main;
+    }
+
     private void Update()
     {
         if (!GameManager.Instance.IsGameStarted)
@@ -39,9 +45,8 @@ public class ButtonController : Singleton<ButtonController>
         if (!Input.GetMouseButtonDown(0))
             return;
         
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, 100))
+        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out var hit, 100))
         {
             if (hit.transform == transform)
             {
@@ -50,8 +55,6 @@ public class ButtonController : Singleton<ButtonController>
         }
     }
 
-    #region Private Methods
-    
     private void OnGameFinished()
     {
         ResetButton();
@@ -74,6 +77,4 @@ public class ButtonController : Singleton<ButtonController>
     {
         m_ClickText.SetText(m_ClickCount.ToString());
     }
-
-    #endregion
 }
