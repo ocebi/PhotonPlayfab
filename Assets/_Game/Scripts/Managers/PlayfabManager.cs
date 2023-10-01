@@ -1,11 +1,17 @@
+using System;
 using System.Collections.Generic;
 using PlayFab;
 using PlayFab.ClientModels;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class PlayfabManager : Singleton<PlayfabManager>
 {
+    public static Action OnLoginStatusChanged;
+    public static Action<string> OnMessageReceived;
+    public static Action<string> OnErrorReceived;
+    
     public bool IsLoggedIn => PlayFabClientAPI.IsClientLoggedIn();
     private LoginData m_LoginData;
     private UserData m_UserData;
@@ -33,6 +39,7 @@ public class PlayfabManager : Singleton<PlayfabManager>
         if (loginData.Password.Length < 6)
         {
             Debug.LogError("Password is too short");
+            OnErrorReceived.InvokeSafe("Password is too short");
             return;
         }
         m_LoginData = loginData;
@@ -66,8 +73,9 @@ public class PlayfabManager : Singleton<PlayfabManager>
     {
         PlayFabClientAPI.ForgetAllCredentials();
         Debug.LogError("Logged out");
+        OnLoginStatusChanged.InvokeSafe();
     }
-    
+
     [Button]
     public void UpdatePlayerStatistic(PlayerStatistics playerStatistics, int value)
     {
@@ -107,77 +115,8 @@ public class PlayfabManager : Singleton<PlayfabManager>
         };
         PlayFabClientAPI.UpdateUserTitleDisplayName(request, OnDisplayNameUpdateSuccess, OnPlayFabError);
     }
-
-    #endregion
-
-    #region Responses
-
-    private void OnRegisterSuccess(RegisterPlayFabUserResult registerSuccessResult)
-    {
-        Debug.LogError("Register success");
-        Login(m_LoginData);
-    }
     
-    private void OnRegisterFail(PlayFabError registerFailResult)
-    {
-        Debug.LogError($"Register fail. {registerFailResult.Error} - {registerFailResult.ErrorMessage}");
-        if (registerFailResult.Error == PlayFabErrorCode.EmailAddressNotAvailable) //Try to login instead
-        {
-            Login(m_LoginData);
-        }
-    }
-
-    private void OnLoginSuccess(LoginResult loginResult)
-    {
-        GameConfig.Instance.UserData = new UserData(); //TODO: To be refactored
-        Debug.LogError("Successful login/account creation");
-        string name = null;
-        if (loginResult.InfoResultPayload.PlayerProfile != null)
-            name = loginResult.InfoResultPayload.PlayerProfile.DisplayName;
-        if (name == null)
-            InitializePlayerData();
-        else
-            GameConfig.Instance.UserData.Username = name;
-        GetStatistics();
-    }
-    
-    private void OnPlayFabError(PlayFabError playfabError)
-    {
-        Debug.LogError($"Login failed: {playfabError.Error.ToString()}");
-    }
-    
-    private void OnDisplayNameUpdateSuccess(UpdateUserTitleDisplayNameResult updateUserTitleDisplayNameResult)
-    {
-        Debug.LogError("Display name updated successfully");
-        GameConfig.Instance.UserData.Username = updateUserTitleDisplayNameResult.DisplayName;
-    }
-
-    private void OnGetStatistics(GetPlayerStatisticsResult result)
-    {
-        Debug.Log("Received the following Statistics:");
-        UserData userData = new UserData();
-        if (GameConfig.Instance.UserData != null)
-            userData = GameConfig.Instance.UserData;
-        foreach (var eachStat in result.Statistics)
-        {
-            Debug.Log("Statistic (" + eachStat.StatisticName + "): " + eachStat.Value);
-            foreach (var playerStatistics in GameConfig.Instance.PlayerStatisticsList)
-            {
-                if (eachStat.StatisticName == playerStatistics.ToString())
-                {
-                    userData.PlayerStatisticDictionary.Add(playerStatistics, eachStat.Value);
-                    break;
-                }
-            }
-        }
-        GameConfig.Instance.UserData = userData;
-    }
-    
-    #endregion
-
-    #region Private Methods
-
-    private void GetStatistics()
+    public void GetStatistics()
     {
         PlayFabClientAPI.GetPlayerStatistics(
             new GetPlayerStatisticsRequest(),
@@ -186,19 +125,87 @@ public class PlayfabManager : Singleton<PlayfabManager>
         );
     }
 
+    #endregion
+
+    #region Responses
+
+    private void OnRegisterSuccess(RegisterPlayFabUserResult registerSuccessResult)
+    {
+        Login(m_LoginData);
+    }
+    
+    private void OnRegisterFail(PlayFabError registerFailResult)
+    {
+        if (registerFailResult.Error == PlayFabErrorCode.EmailAddressNotAvailable) //Try to login instead
+            Login(m_LoginData);
+        else
+            OnErrorReceived.InvokeSafe(registerFailResult.Error.ToString());
+    }
+
+    private void OnLoginSuccess(LoginResult loginResult)
+    {
+        GameConfig.Instance.UserData = new UserData(); //TODO: To be refactored
+        string name = null;
+        if (loginResult.InfoResultPayload.PlayerProfile != null)
+            name = loginResult.InfoResultPayload.PlayerProfile.DisplayName;
+        if (name == null)
+            InitializePlayerData();
+        else
+            GameConfig.Instance.UserData.Username = name;
+        GetStatistics();
+        OnLoginStatusChanged.InvokeSafe();
+    }
+    
+    private void OnPlayFabError(PlayFabError playfabError)
+    {
+        Debug.LogError($"Playfab error: {playfabError.Error.ToString()}");
+        OnErrorReceived.InvokeSafe(playfabError.Error.ToString());
+    }
+    
+    private void OnDisplayNameUpdateSuccess(UpdateUserTitleDisplayNameResult updateUserTitleDisplayNameResult)
+    {
+        GameConfig.Instance.UserData.Username = updateUserTitleDisplayNameResult.DisplayName;
+        OnMessageReceived.InvokeSafe("Name set successfully");
+    }
+
+    private void OnGetStatistics(GetPlayerStatisticsResult result)
+    {
+        if (IsSingletonLogsEnabled)
+            Debug.Log("Received the following Statistics:");
+        UserData userData = new UserData();
+        if (GameConfig.Instance.UserData != null)
+            userData = GameConfig.Instance.UserData;
+        foreach (var eachStat in result.Statistics)
+        {
+            if (IsSingletonLogsEnabled)
+                Debug.Log("Statistic (" + eachStat.StatisticName + "): " + eachStat.Value);
+            foreach (var playerStatistics in GameConfig.Instance.PlayerStatisticsList)
+            {
+                if (eachStat.StatisticName != playerStatistics.ToString()) continue;
+                
+                if (!userData.PlayerStatisticDictionary.ContainsKey(playerStatistics))
+                    userData.PlayerStatisticDictionary.Add(playerStatistics, eachStat.Value);
+                else
+                    userData.PlayerStatisticDictionary[playerStatistics] = eachStat.Value;
+                break;
+            }
+        }
+        GameConfig.Instance.UserData = userData;
+    }
+
+    #endregion
+
+    #region Private Methods
+
     private void InitializePlayerData()
     {
-        UpdateDisplayName($"Player_{Random.Range(100000, 1000000)}");
+        string name = $"Player_{Random.Range(100000, 1000000)}";
+        GameConfig.Instance.UserData.Username = name;
+        UpdateDisplayName(name);
         foreach (var playerStatistics in GameConfig.Instance.PlayerStatisticsList)
         {
             UpdatePlayerStatistic(playerStatistics, 0);
         }
-    }
-
-    [Button]
-    private void PrintLoggedIn()
-    {
-        Debug.LogError($"Logged in: {IsLoggedIn}");
     }
     
     #endregion
