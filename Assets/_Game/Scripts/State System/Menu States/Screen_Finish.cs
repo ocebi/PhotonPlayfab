@@ -57,7 +57,6 @@ public class Screen_Finish : State
         m_OpponentStatsText.SetText("");
         m_PlayerScoreText.SetText("");
         m_OpponentScoreText.SetText("");
-        // int highScore = 0, winCount = 0, loseCount = 0;
         foreach (var currentRoomPlayer in PhotonNetwork.CurrentRoom.Players)
         {
             int playerStat = 0;
@@ -69,13 +68,6 @@ public class Screen_Finish : State
                 statsText += $"{playerStatistics.ToString()}: {playerStat}\n";
                 playerStat = 0;
             }
-            // if (currentRoomPlayer.Value.CustomProperties.TryGetValue(PlayerStatistics.HighScore.ToString(), out var highScoreObject))
-            //     highScore = (byte)highScoreObject;
-            // if (currentRoomPlayer.Value.CustomProperties.TryGetValue(PlayerStatistics.WinCount.ToString(), out var winCountObject))
-            //     winCount = (byte)winCountObject;
-            // if (currentRoomPlayer.Value.CustomProperties.TryGetValue(PlayerStatistics.LoseCount.ToString(), out var loseCountObject))
-            //     loseCount = (byte)loseCountObject;
-            // statsText += $"Highscore: {highScore}\nWin count: {winCount}\nLose count: {loseCount}";
             if (currentRoomPlayer.Value.IsLocal)
             {
                 m_PlayerStatsText.SetText(statsText);
