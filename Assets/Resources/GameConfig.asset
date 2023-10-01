@@ -16,10 +16,10 @@ MonoBehaviour:
     Username: test2
     PlayerStatisticDictionary:
       keyData: 020000000100000000000000
-      valueData: 02000000060000004c000000
-  MaxPlayers: 1
+      valueData: 02000000090000004c000000
+  MaxPlayers: 2
   InitialCountdown: 5
-  MatchDuration: 10
+  MatchDuration: 30
   PlayerStatisticsList: 000000000100000002000000
   InfoMessageDictionary:
     keyData: 000000000100000002000000030000000400000005000000

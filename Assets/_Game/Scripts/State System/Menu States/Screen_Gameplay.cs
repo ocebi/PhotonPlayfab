@@ -47,7 +47,7 @@ public class Screen_Gameplay : State
     private void Update()
     {
         if (m_InitialTimer.IsTimerActive)
-            m_InitialTimerText.SetText(m_InitialTimer.RemainingTime);
+            m_InitialTimerText.SetText("Starting game in " + m_InitialTimer.RemainingTime);
         if (m_MatchTimer.IsTimerActive)
             m_MatchTimerText.SetText(m_MatchTimer.RemainingTime);
     }
