@@ -8,10 +8,10 @@ namespace StateSystem
         protected GameObject Owner;
         protected float StateStartTime;
 
-        public virtual void Initialize(StateMachine i_StateMachine, GameObject i_Owner)
+        public virtual void Initialize(StateMachine stateMachine, GameObject owner)
         {
-            StateMachine = i_StateMachine;
-            Owner = i_Owner;
+            StateMachine = stateMachine;
+            Owner = owner;
         }
 
         public virtual void OnStateEnter()
