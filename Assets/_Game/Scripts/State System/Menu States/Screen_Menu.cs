@@ -129,7 +129,7 @@ public class Screen_Menu : State, IConnectionCallbacks
     
     private void OnManualLoginButtonClicked()
     {
-        SetInfoText("");
+        SetInfoText(GameConfig.Instance.InfoMessageDictionary[InfoMessages.Login]);
         var loginData = new LoginData(m_EmailInputField.text, m_PasswordInputField.text);
         PlayfabManager.Instance.Register(loginData);
     }

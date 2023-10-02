@@ -47,7 +47,7 @@ public class PlayfabManager : Singleton<PlayfabManager>
 
         var request = new RegisterPlayFabUserRequest
         {
-            Email = loginData.Email,
+            Username = loginData.UserName,
             Password = loginData.Password,
             RequireBothUsernameAndEmail = false,
         };
@@ -57,16 +57,16 @@ public class PlayfabManager : Singleton<PlayfabManager>
     [Button]
     public void Login(LoginData loginData)
     {
-        var request = new LoginWithEmailAddressRequest()
+        var request = new LoginWithPlayFabRequest()
         {
-            Email = loginData.Email,
-            Password = loginData.Password,
+            Username = m_LoginData.UserName,
+            Password = m_LoginData.Password,
             InfoRequestParameters = new GetPlayerCombinedInfoRequestParams
             {
                 GetPlayerProfile = true
             }
         };
-        PlayFabClientAPI.LoginWithEmailAddress(request, OnLoginSuccess, OnPlayFabError);
+        PlayFabClientAPI.LoginWithPlayFab(request, OnLoginSuccess, OnPlayFabError);
     }
 
     [Button]
@@ -140,7 +140,7 @@ public class PlayfabManager : Singleton<PlayfabManager>
     
     private void OnRegisterFail(PlayFabError registerFailResult)
     {
-        if (registerFailResult.Error == PlayFabErrorCode.EmailAddressNotAvailable) //Try to login instead
+        if (registerFailResult.Error == PlayFabErrorCode.UsernameNotAvailable) //Try to login instead
             Login(m_LoginData);
         else
             OnErrorReceived.InvokeSafe(registerFailResult.Error.ToString());
@@ -218,12 +218,12 @@ public class PlayfabManager : Singleton<PlayfabManager>
 
 public class LoginData
 {
-    public string Email;
+    public string UserName;
     public string Password;
 
-    public LoginData(string email, string password)
+    public LoginData(string userName, string password)
     {
-        Email = email;
+        UserName = userName;
         Password = password;
     }
 }
