@@ -1,10 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Photon.Pun;
 using Photon.Realtime;
-using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class GameManager : Singleton<GameManager>, IInRoomCallbacks
@@ -91,7 +88,7 @@ public class GameManager : Singleton<GameManager>, IInRoomCallbacks
         if (PlayerScoreDict.Count >= GameConfig.Instance.MaxPlayers)
         {
             Player winnerPlayer = null;
-            int highestScore = 0;
+            int highestScore = -1;
             foreach (var keyValuePair in PlayerScoreDict)
             {
                 if (keyValuePair.Value > highestScore)
@@ -99,21 +96,28 @@ public class GameManager : Singleton<GameManager>, IInRoomCallbacks
                     winnerPlayer = keyValuePair.Key;
                     highestScore = keyValuePair.Value;
                 }
+                else if (keyValuePair.Value == highestScore) //Draw
+                {
+                    winnerPlayer = null;
+                }
             }
 
-            if (winnerPlayer.IsLocal)
+            if (winnerPlayer != null)
             {
-                var currentWinCount = 0;
-                if (GameConfig.Instance.UserData.PlayerStatisticDictionary.ContainsKey(PlayerStatistics.WinCount))
-                    currentWinCount = GameConfig.Instance.UserData.PlayerStatisticDictionary[PlayerStatistics.WinCount];
-                PlayfabManager.Instance.UpdatePlayerStatistic(PlayerStatistics.WinCount, ++currentWinCount);
-            }
-            else
-            {
-                var currentLoseCount = 0;
-                if (GameConfig.Instance.UserData.PlayerStatisticDictionary.ContainsKey(PlayerStatistics.LoseCount))
-                    currentLoseCount = GameConfig.Instance.UserData.PlayerStatisticDictionary[PlayerStatistics.LoseCount];
-                PlayfabManager.Instance.UpdatePlayerStatistic(PlayerStatistics.LoseCount, ++currentLoseCount);
+                if (winnerPlayer.IsLocal)
+                {
+                    var currentWinCount = 0;
+                    if (GameConfig.Instance.UserData.PlayerStatisticDictionary.ContainsKey(PlayerStatistics.WinCount))
+                        currentWinCount = GameConfig.Instance.UserData.PlayerStatisticDictionary[PlayerStatistics.WinCount];
+                    PlayfabManager.Instance.UpdatePlayerStatistic(PlayerStatistics.WinCount, ++currentWinCount);
+                }
+                else
+                {
+                    var currentLoseCount = 0;
+                    if (GameConfig.Instance.UserData.PlayerStatisticDictionary.ContainsKey(PlayerStatistics.LoseCount))
+                        currentLoseCount = GameConfig.Instance.UserData.PlayerStatisticDictionary[PlayerStatistics.LoseCount];
+                    PlayfabManager.Instance.UpdatePlayerStatistic(PlayerStatistics.LoseCount, ++currentLoseCount);
+                }
             }
 
             WinnerPlayer = winnerPlayer;

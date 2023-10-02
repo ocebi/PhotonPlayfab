@@ -79,6 +79,9 @@ public class Screen_Finish : State
                 m_OpponentScoreText.SetText($"{currentRoomPlayer.Value.NickName}\n{GameManager.Instance.GetScore(currentRoomPlayer.Value)}");
             }
         }
-        m_WinnerText.SetText($"{GameManager.Instance.WinnerPlayer.NickName} Won!");
+        if (GameManager.Instance.WinnerPlayer != null)
+            m_WinnerText.SetText($"{GameManager.Instance.WinnerPlayer.NickName} Won!");
+        else
+            m_WinnerText.SetText("Draw");
     }
 }
